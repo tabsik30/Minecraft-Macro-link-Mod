@@ -1,0 +1,64 @@
+plugins {
+    id 'net.fabricmc.fabric-loom' version "${loom_version}"
+    id 'com.gradleup.shadow' version '8.3.5'
+}
+
+version = project.mod_version
+group = project.maven_group
+
+base {
+    archivesName = project.archives_base_name
+}
+
+repositories {
+    mavenCentral()
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
+}
+
+// Obejscie znanego buga pluginu Shadow: nie potrafi zremapowac klas
+// skompilowanych z nowoczesna konkatenacja stringow przez invokedynamic
+// (domyslna od Javy 9+). Wymuszamy stary styl (StringBuilder) tylko na
+// potrzeby tego builda - zero wplywu na dzialanie kodu.
+tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs << '-XDstringConcat=inline'
+}
+
+// Osobna konfiguracja na zależności, które chcemy "wszyć" do finalnego jara
+configurations {
+    shadowBundle
+    implementation.extendsFrom shadowBundle
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${minecraft_version}"
+    // Od 26.1 Minecraft nie jest juz obfuskowany, wiec nie ma czego mapowac -
+    // nie deklarujemy zadnych "mappings", nowy wariant Loom tego nie potrzebuje.
+
+    implementation "net.fabricmc:fabric-loader:${loader_version}"
+    implementation "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
+
+    // Biblioteka WebSocket - trafi do finalnego jara przez shadow
+    shadowBundle "org.java-websocket:Java-WebSocket:1.5.7"
+}
+
+shadowJar {
+    configurations = [project.configurations.shadowBundle]
+    archiveClassifier.set('')
+    // Bez relokacji: dla malego, prywatnego moda ryzyko konfliktu pakietow
+    // jest znikome, a Shadow wtedy kopiuje klasy zamiast je remapowac -
+    // omija to znany bug z ASM/invokedynamic przy remapowaniu.
+}
+
+// Od 26.1 nie ma remapJar (brak remapowania) - budujemy zwykły jar przez shadow
+build.dependsOn(shadowJar)
+
+processResources {
+    inputs.property "version", project.version
+    filesMatching("fabric.mod.json") {
+        expand "version": project.version
+    }
+}
