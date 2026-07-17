@@ -33,6 +33,10 @@ public class PlayerDataCollector {
         // Prawdziwy dzien/noc dorobimy jak znajdziemy wlasciwe wejscie do world clock API.
         long timeOfDay = player.level().getGameTime();
 
+        int air = player.getAirSupply();
+        int maxAir = player.getMaxAirSupply();
+        int xpLevel = player.experienceLevel;
+
         return String.format(Locale.US,
                 "{"
                         + "\"health\":%.1f,"
@@ -44,7 +48,10 @@ public class PlayerDataCollector {
                         + "\"z\":%.2f,"
                         + "\"dimension\":\"%s\","
                         + "\"biome\":\"%s\","
-                        + "\"timeOfDay\":%d"
+                        + "\"timeOfDay\":%d,"
+                        + "\"air\":%d,"
+                        + "\"maxAir\":%d,"
+                        + "\"xpLevel\":%d"
                         + "}",
                 player.getHealth(),
                 player.getMaxHealth(),
@@ -53,7 +60,10 @@ public class PlayerDataCollector {
                 player.getX(), player.getY(), player.getZ(),
                 dimension,
                 biomeName,
-                timeOfDay
+                timeOfDay,
+                air,
+                maxAir,
+                xpLevel
         );
     }
 }
