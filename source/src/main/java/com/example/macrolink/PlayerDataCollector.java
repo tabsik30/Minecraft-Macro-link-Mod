@@ -36,6 +36,9 @@ public class PlayerDataCollector {
         int air = player.getAirSupply();
         int maxAir = player.getMaxAirSupply();
         int xpLevel = player.experienceLevel;
+        // Postep do nastepnego levelu, 0.0-1.0 - to wlasnie to pole napedza pasek
+        // doswiadczenia pod paskiem hotbaru w standardowym HUD-zie Minecrafta.
+        float xpProgress = player.experienceProgress;
 
         return String.format(Locale.US,
                 "{"
@@ -51,7 +54,8 @@ public class PlayerDataCollector {
                         + "\"timeOfDay\":%d,"
                         + "\"air\":%d,"
                         + "\"maxAir\":%d,"
-                        + "\"xpLevel\":%d"
+                        + "\"xpLevel\":%d,"
+                        + "\"xpProgress\":%.3f"
                         + "}",
                 player.getHealth(),
                 player.getMaxHealth(),
@@ -63,7 +67,8 @@ public class PlayerDataCollector {
                 timeOfDay,
                 air,
                 maxAir,
-                xpLevel
+                xpLevel,
+                xpProgress
         );
     }
 }
